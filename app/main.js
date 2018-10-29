@@ -50,6 +50,9 @@ http.createServer((req, res)=>{
 
     if( pathname.split('.')[1] == "css"){
         //peticion de la hoja css
+        fs.readFile(".."+pathname, (err,data)=>{
+            
+        });
     }
 }).listen(8081);
 

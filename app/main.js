@@ -46,7 +46,7 @@ http.createServer((req, res)=>{
 
     if (req.method === 'POST' && pathname === '/cv'){
         //peticion del formulario a traves del metodo POST
-        collectRequestData(res, (err,result)=>{
+        collectRequestData(req, (err,result)=>{
             if (err){
                 res.writeHead(404,{
                     'Content-Type':'text/html'
@@ -67,9 +67,9 @@ http.createServer((req, res)=>{
                     'Content-Type':mimeType[pathname.split('.').pop()] || 'text/html'
                 });
                 //variables de control
-                let parsedData = data.toString.replace("${dui}",result.dui)
+                let parsedData = data.toString().replace("${dui}",result.dui)
                                  .replace("${lastname}",result.lastname)
-                                 .replace("${first}",result.firstname)
+                                 .replace("${firstname}",result.firstname)
                                  .replace("${gender}",result.gender)
                                  .replace("${civilStatus}",result.civilStatus)
                                  .replace("${birth}",result.birth)
@@ -104,9 +104,8 @@ http.createServer((req, res)=>{
 }).listen(8081);
 
 function collectRequestData(request, callback){
-    const FROM_URLUNCODED = 'application/x-www-from-urlencoded';
-    
-    if(request.headers['Content-Type']==FROM_URLUNCODED){
+    const FORM_URLENCODED = 'application/x-www-form-urlencoded';
+   if(request.headers['content-type']===FORM_URLENCODED){
         let body = '';
         //evento de acumulacion de data.
         request.on('data', chunk =>{
@@ -118,7 +117,7 @@ function collectRequestData(request, callback){
         });
     }else{
         callback({
-            msg:`The content-type don't is equals to ${FROM_URLUNCODED}`
+            msg:`The content-type don't is equals to ${FORM_URLENCODED}`
         });
     }
 }

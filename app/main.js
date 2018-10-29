@@ -46,12 +46,59 @@ http.createServer((req, res)=>{
 
     if (req.method === 'POST' && pathname === '/cv'){
         //peticion del formulario a traves del metodo POST
+        collectRequestData(res, (err,result)=>{
+            if (err){
+                res.writeHead(404,{
+                    'Content-Type':'text/html'
+                });
+                return res.end('Bad Request');
+            }
+            fs.readFile("../templates/plantilla.html", function(err,data){
+                if (err){
+                    console.log(err);
+                    //HTTP Status: 404 : NOT FOUND
+                    //Content Type: text/plain
+                    res.writeHead(404,{
+                       'Content-Type':'text/html' 
+                    });
+                    return res.end("404 Not Found");
+                }
+                res.writeHead(200,{
+                    'Content-Type':mimeType[pathname.split('.').pop()] || 'text/html'
+                });
+                //variables de control
+                let parsedData = data.toString.replace("${dui}",result.dui)
+                                 .replace("${lastname}",result.lastname)
+                                 .replace("${first}",result.firstname)
+                                 .replace("${gender}",result.gender)
+                                 .replace("${civilStatus}",result.civilStatus)
+                                 .replace("${birth}",result.birth)
+                                 .replace("${exp}",result.exp)
+                                 .replace("${tel}",result.tel)
+                                 .replace("${std}",result.std);
+                res.write(parsedData);
+                res.end();
+            });
+        });
     }
 
     if( pathname.split('.')[1] == "css"){
         //peticion de la hoja css
         fs.readFile(".."+pathname, (err,data)=>{
-            
+            if (err){
+                console.log(err);
+                res.writeHead(404,{
+                    'Content-Type':'text/html'
+                });
+                return res.end("404 Not Found");
+            }
+            res.writeHead(200,{
+                'Content-Type':mimeType[pathname.split('.').pop()] || 'text/css'
+            });
+            //escribe el contenido de la data en el body de la respuesta
+            res.write(data.toString());
+            //envia la respuesta
+            return res.end();
         });
     }
 }).listen(8081);
@@ -59,7 +106,7 @@ http.createServer((req, res)=>{
 function collectRequestData(request, callback){
     const FROM_URLUNCODED = 'application/x-www-from-urlencoded';
     
-    if(request.headers['content-type']==FROM_URLUNCODED){
+    if(request.headers['Content-Type']==FROM_URLUNCODED){
         let body = '';
         //evento de acumulacion de data.
         request.on('data', chunk =>{
